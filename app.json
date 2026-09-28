@@ -1,0 +1,42 @@
+{
+  "id": "qrcode",
+  "versaoDoContrato": 1,
+  "camada": "primeira-parte",
+  "nome": {
+    "pt-BR": "QR Code",
+    "en-US": "QR Code",
+    "es-ES": "QR Code",
+    "fr-FR": "Code QR",
+    "de-DE": "QR-Code",
+    "ja-JP": "QRコード",
+    "zh-CN": "二维码",
+    "hi-IN": "QR कोड",
+    "ru-RU": "QR-код",
+    "ar-AR": "رمز QR"
+  },
+  "descricao": {
+    "pt-BR": "Gere QR Codes de links, Wi-Fi, e-mail e texto, no próprio aparelho",
+    "en-US": "Make QR codes for links, Wi-Fi, email and text, right on your device",
+    "es-ES": "Crea códigos QR de enlaces, Wi-Fi, correo y texto, en tu propio dispositivo",
+    "fr-FR": "Créez des codes QR pour liens, Wi-Fi, e-mail et texte, sur votre appareil",
+    "de-DE": "QR-Codes für Links, WLAN, E-Mail und Text, direkt auf Ihrem Gerät",
+    "ja-JP": "リンク、Wi-Fi、メール、テキストのQRコードを端末上で作成",
+    "zh-CN": "在你的设备上为链接、Wi-Fi、邮件和文字生成二维码",
+    "hi-IN": "लिंक, वाई-फ़ाई, ईमेल और टेक्स्ट के QR कोड अपने ही डिवाइस पर बनाएं",
+    "ru-RU": "QR-коды для ссылок, Wi-Fi, почты и текста прямо на вашем устройстве",
+    "ar-AR": "أنشئ رموز QR للروابط وشبكات Wi-Fi والبريد والنص على جهازك نفسه"
+  },
+  "icone": "qr_code_2",
+  "cor": "#8b5cf6",
+  "categoria": "utilities",
+  "janela": {
+    "largura": 1080,
+    "altura": 720,
+    "minLargura": 360,
+    "minAltura": 480
+  },
+  "capacidades": ["colecoes"],
+  "colecoes": ["historico"],
+  "autor": "Roque Ribeiro",
+  "licenca": "MIT"
+}

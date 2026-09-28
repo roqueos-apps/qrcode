@@ -1,0 +1,323 @@
+// O visual do QR Code.
+//
+// As cores do tema vêm só das variáveis do contrato do app-sdk (`--ros-text-rgb`,
+// `--ros-fill-rgb`, `--ros-line-rgb`, `--ros-surface-0-rgb`, `--ros-shadow-rgb`), sempre com o
+// valor de reserva do tema padrão, para o `yarn dev` ficar igual ao RoqueOS. As cores que são
+// do QR Code usam o prefixo `--qr-`: o `--ros-` é do sistema, e o `app check` reprova declarar
+// um. O acento (`--qr-acento`) chega do componente, no `style` da raiz.
+
+.qr {
+  --qr-texto: rgba(var(--ros-text-rgb, 255, 255, 255), 0.95);
+  --qr-texto-2: rgba(var(--ros-text-rgb, 255, 255, 255), 0.7);
+  --qr-texto-3: rgba(var(--ros-text-rgb, 255, 255, 255), 0.55);
+  --qr-borda: rgba(var(--ros-line-rgb, 255, 255, 255), 0.1);
+  --qr-borda-2: rgba(var(--ros-line-rgb, 255, 255, 255), 0.18);
+  --qr-vidro: rgba(var(--ros-fill-rgb, 255, 255, 255), 0.05);
+  --qr-vidro-2: rgba(var(--ros-fill-rgb, 255, 255, 255), 0.09);
+  --qr-fundo: rgb(var(--ros-surface-0-rgb, 20, 20, 22));
+  --qr-sombra: rgba(var(--ros-shadow-rgb, 0, 0, 0), 0.4);
+  --qr-raio: 12px;
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  container: qr / inline-size;
+  color: var(--qr-texto);
+  background: var(--qr-fundo);
+  // O app não herda o box-sizing do Quasar fora do RoqueOS: declara o dele.
+  box-sizing: border-box;
+  font-family: inherit;
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: inherit;
+  }
+
+  &__principal {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    flex: 1;
+    min-height: 0;
+  }
+
+  &__previa {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 32px 24px;
+    background: radial-gradient(
+      ellipse 90% 70% at 50% 30%,
+      rgba(var(--qr-acento-rgb), 0.16),
+      transparent 70%
+    );
+    border-inline-end: 1px solid var(--qr-borda);
+  }
+
+  &__cartao {
+    width: 220px;
+    height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    border-radius: 20px;
+    box-shadow:
+      0 20px 60px var(--qr-sombra),
+      0 0 0 1px var(--qr-borda);
+  }
+
+  &__imagem {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    image-rendering: pixelated;
+  }
+
+  &__vazio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+
+    p {
+      margin: 0;
+      font-size: 13px;
+    }
+  }
+
+  &__acoes {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  &__controles {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 24px;
+    overflow-y: auto;
+  }
+
+  &__topo {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  &__contador {
+    margin-inline-start: 6px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    font-size: 11px;
+    background: rgba(var(--qr-acento-rgb), 0.25);
+    color: var(--qr-texto);
+  }
+
+  &__campo,
+  &__grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  &__rotulo {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--qr-texto-3);
+  }
+
+  &__texto {
+    width: 100%;
+    min-height: 88px;
+    padding: 14px 16px;
+    border: 1px solid var(--qr-borda);
+    border-radius: var(--qr-raio);
+    background: var(--qr-vidro);
+    color: var(--qr-texto);
+    font: inherit;
+    font-size: 14px;
+    resize: vertical;
+
+    &::placeholder {
+      color: var(--qr-texto-3);
+    }
+
+    &:focus-visible {
+      outline: none;
+      border-color: var(--qr-acento);
+      box-shadow: 0 0 0 3px rgba(var(--qr-acento-rgb), 0.2);
+    }
+  }
+
+  &__tipos {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  &__tipo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 8px;
+    border: 1px solid var(--qr-borda);
+    border-radius: var(--qr-raio);
+    background: var(--qr-vidro);
+    color: var(--qr-texto-2);
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--qr-vidro-2);
+      color: var(--qr-texto);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--qr-acento);
+      outline-offset: 2px;
+    }
+
+    &.ativo {
+      border-color: transparent;
+      background: var(--qr-acento);
+      color: #fff;
+    }
+  }
+
+  &__personalizar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  &__cor,
+  &__tamanho {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--qr-texto-2);
+  }
+
+  &__cor input {
+    width: 48px;
+    height: 44px;
+    padding: 2px;
+    border: 1px solid var(--qr-borda-2);
+    border-radius: 10px;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  &__tamanho select {
+    min-width: 120px;
+    padding: 10px 12px;
+    border: 1px solid var(--qr-borda);
+    border-radius: 10px;
+    background: var(--qr-vidro);
+    color: var(--qr-texto);
+    font: inherit;
+    font-size: 13px;
+
+    option {
+      background: var(--qr-fundo);
+      color: var(--qr-texto);
+    }
+  }
+
+  &__historico {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__historico-aviso {
+    padding: 14px;
+    font-size: 13px;
+    color: var(--qr-texto-2);
+  }
+
+  &__entrada {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 10px;
+    align-items: center;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--qr-borda);
+    border-radius: var(--qr-raio);
+    background: var(--qr-vidro);
+    color: var(--qr-texto);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+
+    &:hover {
+      border-color: rgba(var(--qr-acento-rgb), 0.4);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--qr-acento);
+      outline-offset: 2px;
+    }
+  }
+
+  &__miniatura {
+    display: block;
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    image-rendering: pixelated;
+  }
+
+  &__entrada-texto {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__historico-pe {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 16px;
+
+    [aria-disabled='true'] {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Janela estreita (celular, ou a janela encolhida): uma coluna só, rolando inteira.
+@container qr (max-width: 700px) {
+  .qr__principal {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+
+  .qr__previa {
+    padding: 24px 16px;
+    border-inline-end: none;
+    border-bottom: 1px solid var(--qr-borda);
+  }
+
+  .qr__controles {
+    overflow: visible;
+  }
+}
