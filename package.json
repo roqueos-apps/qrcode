@@ -1,6 +1,6 @@
 {
   "name": "@roqueos-apps/qrcode",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "O QR Code do RoqueOS: gera o código de link, Wi-Fi, e-mail, telefone, SMS ou texto no próprio aparelho, com cor e tamanho, e guarda o histórico na conta, nos dez idiomas do sistema.",
   "license": "MIT",
@@ -18,6 +18,7 @@
     "src",
     "i18n",
     "app.json",
+    "paridade.json",
     "ASSETS.md",
     "LICENSE",
     "README.md"
@@ -37,7 +38,7 @@
   },
   "dependencies": {
     "@roqueos-apps/app-sdk": "github:roqueos-apps/app-sdk#v0.2.0",
-    "@roqueos-apps/ui": "git+ssh://git@github.com/roqueos-apps/ui.git#v0.2.1",
+    "@roqueos-apps/ui": "git+ssh://git@github.com/roqueos-apps/ui.git#v0.6.0",
     "qrcode": "1.5.4"
   },
   "peerDependencies": {

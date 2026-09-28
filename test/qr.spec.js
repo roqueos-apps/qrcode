@@ -2,6 +2,7 @@
 import { describe, it, expect } from 'vitest'
 import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
+import QRCode from 'qrcode'
 import {
   FRENTE_PADRAO,
   FUNDO_PADRAO,
@@ -13,6 +14,7 @@ import {
   lerEntrada,
   novoId,
   ordenarHistorico,
+  pngDaImagem,
   resumo,
   tamanho,
   textoSobre,
@@ -48,7 +50,38 @@ describe('o texto não sai do aparelho', () => {
 
   it('texto que não cabe num QR Code rejeita com código próprio', async () => {
     await expect(gerarImagem('x'.repeat(8000))).rejects.toMatchObject({ codigo: 'longo-demais' })
+    await expect(gerarImagem('x'.repeat(2954))).rejects.toMatchObject({ codigo: 'longo-demais' })
     await expect(gerarImagem('   ')).rejects.toThrow(TypeError)
+  })
+
+  it('cabe todo texto que o serviço de antes gerava (correção L), e o curto sai com a M', async () => {
+    // A M fixa recusava de 2.332 a 2.953 bytes, que o `api.qrserver.com` (correção L) gerava.
+    for (const texto of ['x'.repeat(2332), 'x'.repeat(2953), 'é'.repeat(1476), '日'.repeat(984)]) {
+      await expect(gerarImagem(texto)).resolves.toMatch(/^data:image\/png;base64,/)
+    }
+    // O que cabe na M continua na M, que aguenta o código riscado.
+    const desenho = { width: 300, margin: 2, color: { dark: '#000000', light: '#ffffff' } }
+    expect(await gerarImagem('abc')).toBe(
+      await QRCode.toDataURL('abc', { ...desenho, errorCorrectionLevel: 'M' }),
+    )
+    expect(await gerarImagem('x'.repeat(2400))).toBe(
+      await QRCode.toDataURL('x'.repeat(2400), { ...desenho, errorCorrectionLevel: 'L' }),
+    )
+  })
+
+  it('o PNG para copiar e compartilhar sai sem esperar nada, com os bytes da imagem', async () => {
+    const url = await gerarImagem('abc')
+    const png = pngDaImagem(url)
+    expect(png).toBeInstanceOf(Blob)
+    expect(png.type).toBe('image/png')
+    // O Blob do jsdom não tem `arrayBuffer()`; o FileReader tem.
+    const bytes = await new Promise((resolve) => {
+      const leitor = new FileReader()
+      leitor.onload = () => resolve(new Uint8Array(leitor.result))
+      leitor.readAsArrayBuffer(png)
+    })
+    expect([...bytes.slice(0, 8)]).toEqual([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
+    expect(bytes.length).toBe(atob(url.split(',')[1]).length)
   })
 })
 

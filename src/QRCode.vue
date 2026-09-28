@@ -115,9 +115,14 @@
       :acento="ACENTO"
       :rotulo-fechar="t('fechar')"
     >
-      <div v-if="q.carregandoHistorico.value" class="qr__historico-aviso">
-        {{ t('carregando') }}
-      </div>
+      <RosVazio
+        v-if="q.carregandoHistorico.value"
+        icone="history"
+        :titulo="t('carregando')"
+        :acento="ACENTO"
+        carregando
+        :leve="estado.leve"
+      />
       <RosVazio
         v-else-if="!q.historico.value.length"
         icone="history"

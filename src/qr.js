@@ -55,32 +55,41 @@ export const tamanho = (valor) =>
   TAMANHOS.some((t) => t.valor === Number(valor)) ? Number(valor) : TAMANHO_PADRAO
 
 /**
+ * A correção de erro, da mais forte que cabe para a mais fraca. A M aguenta um código riscado
+ * ou meio apagado; a L é a que o serviço de antes usava sempre, e é a que faz caber o texto
+ * longo (2.953 bytes contra 2.331 da M). Texto que cabia antes continua cabendo.
+ */
+export const CORRECOES = Object.freeze(['M', 'L'])
+
+// O pacote avisa com "The amount of data is too big to be stored in a QR Code".
+const naoCabe = (erro) => /too big/i.test(String(erro?.message))
+
+/**
  * A imagem do código, como data URL PNG. Rejeita com `codigo: 'longo-demais'` quando o texto
- * não cabe num QR Code.
+ * não cabe num QR Code nem com a correção mais fraca.
  * @param {string} texto
  * @param {{ tamanho?: number, frente?: string, fundo?: string }} [opcoes]
  */
 export async function gerarImagem(texto, opcoes = {}) {
   if (typeof texto !== 'string' || !texto.trim()) throw new TypeError('gerarImagem: texto vazio')
-  try {
-    return await QRCode.toDataURL(texto, {
-      width: tamanho(opcoes.tamanho),
-      margin: 2,
-      errorCorrectionLevel: 'M',
-      color: {
-        dark: cor(opcoes.frente, FRENTE_PADRAO),
-        light: cor(opcoes.fundo, FUNDO_PADRAO),
-      },
-    })
-  } catch (erro) {
-    // O pacote avisa com "The amount of data is too big to be stored in a QR Code".
-    if (/too big/i.test(String(erro?.message))) {
-      const longo = new Error('texto longo demais para um QR Code')
-      longo.codigo = 'longo-demais'
-      throw longo
-    }
-    throw erro
+  const desenho = {
+    width: tamanho(opcoes.tamanho),
+    margin: 2,
+    color: {
+      dark: cor(opcoes.frente, FRENTE_PADRAO),
+      light: cor(opcoes.fundo, FUNDO_PADRAO),
+    },
   }
+  for (const errorCorrectionLevel of CORRECOES) {
+    try {
+      return await QRCode.toDataURL(texto, { ...desenho, errorCorrectionLevel })
+    } catch (erro) {
+      if (!naoCabe(erro)) throw erro
+    }
+  }
+  const longo = new Error('texto longo demais para um QR Code')
+  longo.codigo = 'longo-demais'
+  throw longo
 }
 
 /**
@@ -126,10 +135,17 @@ export function ordenarHistorico(docs, limite = LIMITE_DO_HISTORICO) {
 export const resumo = (texto, max = 40) =>
   texto.length > max ? `${texto.slice(0, max - 1).trimEnd()}…` : texto
 
-/** O PNG da data URL, para copiar e compartilhar. */
-export async function pngDaImagem(dataUrl) {
-  const resposta = await fetch(dataUrl)
-  return resposta.blob()
+/**
+ * O PNG da data URL, para copiar e compartilhar. **Síncrono de propósito**: o Safari do iPhone
+ * só deixa escrever na área de transferência e abrir a folha de compartilhar dentro do toque da
+ * pessoa, e um `await` antes da chamada (o `fetch` da data URL, como era) já sai do toque.
+ */
+export function pngDaImagem(dataUrl) {
+  const [, base64 = ''] = String(dataUrl).split(',', 2)
+  const binario = atob(base64)
+  const bytes = new Uint8Array(binario.length)
+  for (let i = 0; i < binario.length; i++) bytes[i] = binario.charCodeAt(i)
+  return new Blob([bytes], { type: 'image/png' })
 }
 
 /** Um id de documento que o SDK aceita (`[A-Za-z0-9_-]`), único o bastante para o histórico. */

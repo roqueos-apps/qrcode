@@ -172,36 +172,56 @@ export function criarQRCode({ sistema, t }) {
     }
   }
 
-  /** Copia a imagem; onde o navegador não copia imagem, copia o texto do código. */
+  // Copiar e compartilhar chamam o navegador ANTES de qualquer `await`: o Safari do iPhone só
+  // aceita a área de transferência e a folha de compartilhar dentro do toque da pessoa.
+
+  /**
+   * Copia a imagem; onde o navegador não copia imagem, ou recusa, copia o texto do código.
+   * Devolve se copiou.
+   */
   async function copiar() {
-    if (!imagem.value) return
+    if (!imagem.value) return false
     const area = globalThis.navigator?.clipboard
-    try {
-      if (area?.write && typeof globalThis.ClipboardItem === 'function') {
-        const png = await pngDaImagem(imagem.value)
+    if (area?.write && typeof globalThis.ClipboardItem === 'function') {
+      try {
+        const png = pngDaImagem(imagem.value)
         await area.write([new globalThis.ClipboardItem({ 'image/png': png })])
         avisar(t('imagemCopiada'))
-      } else if (area?.writeText) {
-        await area.writeText(texto.value)
-        avisar(t('textoCopiado'))
-      } else {
-        throw new Error('sem área de transferência')
+        return true
+      } catch (erro) {
+        // A imagem foi recusada (permissão, tipo): o texto ainda serve.
+        console.error('[qrcode] copiar a imagem:', erro)
       }
+    }
+    try {
+      if (!area?.writeText) throw new Error('sem área de transferência')
+      await area.writeText(texto.value)
+      avisar(t('textoCopiado'))
+      return true
     } catch (erro) {
       console.error('[qrcode] copiar:', erro)
       avisar(t('erroAoCopiar'), 'erro')
+      return false
     }
   }
 
-  /** Compartilha a imagem; sem compartilhamento de arquivo no aparelho, copia. */
+  /**
+   * Compartilha a imagem com o texto do código; o aparelho que não compartilha arquivo
+   * compartilha o texto, e o que não compartilha nada copia.
+   */
   async function compartilhar() {
     if (!imagem.value) return
     const nav = globalThis.navigator
+    const titulo = t('nomeDoApp')
     try {
-      const png = await pngDaImagem(imagem.value)
-      const arquivo = new File([png], 'qrcode.png', { type: 'image/png' })
-      if (nav?.canShare?.({ files: [arquivo] })) {
-        await nav.share({ files: [arquivo], title: t('nomeDoApp') })
+      const arquivo = new File([pngDaImagem(imagem.value)], 'qrcode.png', { type: 'image/png' })
+      const comArquivo = { files: [arquivo], title: titulo, text: texto.value }
+      if (nav?.canShare?.(comArquivo)) {
+        await nav.share(comArquivo)
+        return
+      }
+      if (typeof nav?.share === 'function') {
+        await nav.share({ title: titulo, text: texto.value })
         return
       }
     } catch (erro) {

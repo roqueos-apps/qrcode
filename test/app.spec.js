@@ -152,6 +152,30 @@ describe('o QR Code pelo app-sdk', () => {
     montagem.desmontar()
   })
 
+  it('o histórico que ainda não chegou mostra a barra do carregando, parada no perfil leve', async () => {
+    // O QR Code de antes tinha o spinner ao lado do "Carregando...".
+    for (const modoLeve of [false, true]) {
+      const falso = criarSistemaFalso({
+        appId: 'qrcode',
+        identidade: ANA,
+        colecoes: ['historico'],
+        modoLeve,
+      })
+      const abrir = falso.sistema.colecoes.abrir
+      // A conta ainda não respondeu: a lista nunca chega.
+      falso.sistema.colecoes.abrir = (nome) => ({ ...abrir(nome), observar: () => () => {} })
+      const el = document.createElement('div')
+      document.body.appendChild(el)
+      const montagem = qrcode.mount(el, falso.sistema, { windowId: 'w1', ativo: true })
+      await montou(el)
+      el.querySelector('[data-teste="abrir-historico"]').click()
+      await vi.waitFor(() => expect(el.querySelector('.rui-vazio__barra')).not.toBeNull())
+      expect(el.querySelector('.rui-vazio').textContent).toContain('Carregando...')
+      expect(Boolean(el.querySelector('.rui-vazio__barra--parada'))).toBe(modoLeve)
+      montagem.desmontar()
+    }
+  })
+
   it('abrir uma entrada do histórico desenha o código sem criar outra entrada', async () => {
     const { el, montagem, teste, gravacoes } = montar({
       semear: [antiga('a', { fgColor: '#112233', bgColor: '#fafafa', size: 500 })],
@@ -284,8 +308,9 @@ describe('o QR Code pelo app-sdk', () => {
     const copiar = () =>
       [...el.querySelectorAll('button')].find((b) => b.textContent.trim() === 'Copiar').click()
     copiar()
-    await vi.waitFor(() => expect(escritos).toEqual([['image/png']]))
-    expect(registro.avisos.at(-1).mensagem).toBe('Imagem copiada!')
+    // Dentro do toque, sem esperar nada: o Safari do iPhone recusa a escrita depois de um await.
+    expect(escritos).toEqual([['image/png']])
+    await vi.waitFor(() => expect(registro.avisos.at(-1).mensagem).toBe('Imagem copiada!'))
 
     const textos = []
     vi.stubGlobal('ClipboardItem', undefined)
@@ -297,34 +322,94 @@ describe('o QR Code pelo app-sdk', () => {
     montagem.desmontar()
   })
 
-  it('compartilhar manda o PNG quando o aparelho compartilha arquivo, e copia quando não', async () => {
+  it('copiar a imagem recusada ainda copia o texto do código', async () => {
+    const { el, montagem, teste, registro } = montar()
+    await montou(el)
+    await digitar(teste('texto'), 'abc')
+    teste('gerar').click()
+    await gerou(el)
+    vi.stubGlobal(
+      'ClipboardItem',
+      class {
+        constructor(itens) {
+          this.itens = itens
+        }
+      },
+    )
+    const textos = []
+    vi.stubGlobal('navigator', {
+      clipboard: {
+        write: async () => {
+          throw new DOMException('recusado', 'NotAllowedError')
+        },
+        writeText: async (t) => textos.push(t),
+      },
+    })
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    ;[...el.querySelectorAll('button')].find((b) => b.textContent.trim() === 'Copiar').click()
+    await vi.waitFor(() => expect(textos).toEqual(['abc']))
+    expect(registro.avisos.at(-1)).toEqual({
+      mensagem: 'Texto do QR Code copiado!',
+      tipo: 'sucesso',
+      fixo: false,
+    })
+    vi.unstubAllGlobals()
+    montagem.desmontar()
+  })
+
+  it('compartilhar manda o PNG com o texto; sem arquivo, o texto; sem folha nenhuma, copia', async () => {
     const { el, montagem, teste } = montar()
     await montou(el)
     await digitar(teste('texto'), 'abc')
     teste('gerar').click()
     await gerou(el)
     const compartilhados = []
-    vi.stubGlobal('navigator', {
-      canShare: () => true,
-      share: async (dados) => compartilhados.push(dados.files.map((f) => [f.name, f.type])),
-    })
+    const anotar = async ({ files, ...resto }) =>
+      compartilhados.push({ ...resto, ...(files && { files: files.map((f) => [f.name, f.type]) }) })
+    vi.stubGlobal('navigator', { canShare: () => true, share: anotar })
     const compartilhar = () =>
       [...el.querySelectorAll('button')]
         .find((b) => b.textContent.trim() === 'Compartilhar')
         .click()
     compartilhar()
-    await vi.waitFor(() => expect(compartilhados).toEqual([[['qrcode.png', 'image/png']]]))
+    // Dentro do toque, sem esperar nada: o Safari do iPhone não abre a folha depois de um await.
+    expect(compartilhados).toEqual([
+      { title: 'QR Code', text: 'abc', files: [['qrcode.png', 'image/png']] },
+    ])
+
+    // O aparelho compartilha texto, mas não arquivo: a folha abre com o texto, como antes.
+    vi.stubGlobal('navigator', { canShare: () => false, share: anotar })
+    compartilhar()
+    expect(compartilhados.at(-1)).toEqual({ title: 'QR Code', text: 'abc' })
 
     const textos = []
-    vi.stubGlobal('navigator', {
-      canShare: () => false,
-      // O aparelho compartilha texto, mas não arquivo: não se chama `share` sem o arquivo.
-      share: async () => compartilhados.push('não devia'),
-      clipboard: { writeText: async (t) => textos.push(t) },
-    })
+    vi.stubGlobal('navigator', { clipboard: { writeText: async (t) => textos.push(t) } })
     compartilhar()
     await vi.waitFor(() => expect(textos).toEqual(['abc']))
-    expect(compartilhados).toHaveLength(1)
+    expect(compartilhados).toHaveLength(2)
+    vi.unstubAllGlobals()
+    montagem.desmontar()
+  })
+
+  it('cancelar a folha de compartilhar não copia nada', async () => {
+    const { el, montagem, teste, registro } = montar()
+    await montou(el)
+    await digitar(teste('texto'), 'abc')
+    teste('gerar').click()
+    await gerou(el)
+    const antes = registro.avisos.length
+    const textos = []
+    vi.stubGlobal('navigator', {
+      canShare: () => true,
+      share: async () => {
+        throw new DOMException('cancelou', 'AbortError')
+      },
+      clipboard: { writeText: async (t) => textos.push(t) },
+    })
+    ;[...el.querySelectorAll('button')].find((b) => b.textContent.trim() === 'Compartilhar').click()
+    await flushPromises()
+    expect(textos).toEqual([])
+    expect(registro.avisos).toHaveLength(antes)
     vi.unstubAllGlobals()
     montagem.desmontar()
   })

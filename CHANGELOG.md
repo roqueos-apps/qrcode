@@ -3,6 +3,36 @@
 O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/), e o projeto usa
 [versionamento semântico](https://semver.org/lang/pt-BR/).
 
+## [0.1.1] - 2026-09-28
+
+A auditoria de paridade de 28/09/2026 (Goal 28): o founder pediu que nenhuma funcionalidade
+se perdesse na saída do núcleo.
+
+### Adicionado
+
+- `paridade.json`: o inventário do que o QR Code fazia dentro do RoqueOS, item por item, e o que
+  aconteceu com cada coisa na saída (55 itens: 37 mantidas, 18 mudaram, 0 perdidas). Cada item
+  cita o teste deste repo que o prova, ou a evidência, e o RoqueOS confere o arquivo no pacote
+  instalado: teste citado que não existe mais, estado de dúvida ou perda sem decisão escrita
+  reprovam. O arquivo vai no pacote (`files`).
+
+### Corrigido
+
+- **Texto de 2.332 a 2.953 bytes volta a caber.** A correção de erro estava fixa na M; o
+  serviço de antes usava a L. Agora tenta a M (que aguenta o código riscado) e cai para a L
+  quando o texto não cabe.
+- **Copiar e Compartilhar no Safari do iPhone**: nada é esperado antes de chamar a área de
+  transferência e a folha de compartilhar (o PNG sai da imagem sem `await`), porque o Safari
+  só aceita as duas dentro do toque. A imagem recusada na área de transferência cai no texto
+  do código.
+- **Compartilhar leva o texto do código junto do PNG**, e o aparelho que não compartilha
+  arquivo abre a folha com o texto, como antes; sem folha nenhuma, copia.
+
+### Mudado
+
+- O histórico que ainda não chegou mostra a barra do carregando (o spinner de antes), e a
+  folha do histórico fecha também arrastando a alça (kit `ui` 0.6.0).
+
 ## [0.1.0] - 2026-09-28
 
 O QR Code sai do RoqueOS (Onda 4b do Goal 28), no app-sdk 0.2.0 e no kit `ui` 0.2.0.

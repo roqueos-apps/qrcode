@@ -1,0 +1,423 @@
+{
+  "versao": 1,
+  "app": "qrcode",
+  "antes": "o QR Code de antes, dentro do RoqueOS, até 28/09/2026: a tela do app, o estilo visual, os textos nos 10 idiomas e a entrada do app no registro do RoqueOS.",
+  "auditoria": "28/09/2026: auditoria linha a linha de 58 funcionalidades, lendo o código do QR Code de antes, dentro do RoqueOS (a tela do app, o estilo visual, os textos dos 10 idiomas e a integração que mudou a saída) contra o de depois (roqueos-apps/qrcode v0.1.0, commit 6ac80f7, e o sistema do RoqueOS). Medidas: o serviço antigo (api.qrserver.com, só com textos de teste) devolve PNG de 300×300 px, 1 bit, margem de 1 px, sem zona de silêncio e com correção L (2.900 bytes lidos de volta na versão 40); o gerador novo (qrcode 1.5.4) sai com 200, 300, 500 e 800 px exatos, só nas duas cores pedidas, com margem de 2 módulos, e lê de volta idêntico um Wi-Fi com ç, ã e emoji; os 10 JSON de textos têm as mesmas 48 chaves. Os veredictos conferidos no RoqueOS no mesmo dia (globais G2, G3, G8, G9 e G11 e a seção QR Code) valem acima da auditoria: decidiram as 4 linhas em dúvida (#27, #31 e #57 mantidas, #42 mudou) e registraram os consertos de 28/09 (correção M com recuo para L, copiar e compartilhar sem esperar nada antes da chamada, texto de volta na folha de compartilhar, barra do carregando), provados pelos testes do repo. Nas evidências, o código do QR Code de antes e o comparativo da integração são do RoqueOS de antes; src/ e i18n/ são do repo do app, com linhas da v0.1.0 (os consertos mudaram src/qr.js, src/useQRCode.js e src/QRCode.vue); o sistema do RoqueOS é o de hoje. Puladas as linhas que não existiam antes: #8 contato/vCard e formulário por tipo, #53 atalhos de teclado e #54 preferências guardadas (a doc de usuário antiga prometia vCard, logo, leitor e níveis de correção que o código nunca teve). Nada foi medido no iPhone real.",
+  "funcionalidades": [
+    {
+      "o_que": "Escrever o conteúdo num campo com rótulo e exemplo",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › gera no aparelho e guarda no histórico só o texto, as cores, o tamanho e o tipo"
+      ],
+      "evidencia": "Comparado com src/QRCode.vue:48-57; rótulo \"Conteúdo\" e exemplo \"Cole uma URL, texto, email...\" iguais em pt-BR (i18n/pt-BR.json). O rótulo agora envolve o campo. O teste digita e gera; o texto do rótulo e do exemplo não tem teste."
+    },
+    {
+      "o_que": "Tipo Link, que põe https:// no campo",
+      "estado": "mantida",
+      "testes": [
+        "test/qr.spec.js › cada tipo tem rótulo e ícone, e só o texto livre não tem modelo"
+      ],
+      "evidencia": "Comparado com src/qr.js:13 e src/useQRCode.js:72-78; modeloUrl é \"https://\" nos 10 idiomas. O teste confere só que o tipo url existe e tem modelo; o texto posto no campo não tem teste. O rótulo passou de URL para Link (ver o item dos rótulos no idioma da pessoa)."
+    },
+    {
+      "o_que": "Tipo E-mail, com modelo mailto: de assunto e corpo",
+      "estado": "mantida",
+      "testes": [
+        "test/qr.spec.js › cada tipo tem rótulo e ícone, e só o texto livre não tem modelo"
+      ],
+      "evidencia": "Comparado com src/qr.js:14; em pt-BR o modelo é o mesmo texto (mailto:email@exemplo.com?subject=Assunto&body=Mensagem), nos outros idiomas virou exemplo local. O teste confere que o tipo tem modelo, não o texto dele."
+    },
+    {
+      "o_que": "Tipo Telefone, com modelo tel:",
+      "estado": "mantida",
+      "testes": [
+        "test/qr.spec.js › cada tipo tem rótulo e ícone, e só o texto livre não tem modelo"
+      ],
+      "evidencia": "Comparado com src/qr.js:15; em pt-BR o modelo é o mesmo tel:+5511999999999, nos outros idiomas virou número de exemplo local. O teste confere que o tipo tem modelo, não o texto dele."
+    },
+    {
+      "o_que": "Tipo Wi-Fi, com modelo de rede e senha",
+      "estado": "mantida",
+      "testes": ["test/app.spec.js › o tipo põe o modelo no campo, no idioma da pessoa"],
+      "evidencia": "Comparado com src/qr.js:16; o teste confere o modelo de pt-BR igual ao de antes (WIFI:T:WPA;S:NomeDaRede;P:SenhaDoWiFi;;) e o de en-US. Nem antes nem hoje há campos separados de rede e senha, só o modelo de texto."
+    },
+    {
+      "o_que": "Tipo SMS, com modelo de número e mensagem",
+      "estado": "mantida",
+      "testes": [
+        "test/qr.spec.js › cada tipo tem rótulo e ícone, e só o texto livre não tem modelo"
+      ],
+      "evidencia": "Comparado com src/qr.js:17; em pt-BR o modelo é o mesmo sms:+5511999999999?body=Mensagem, nos outros idiomas virou exemplo local. O teste confere que o tipo tem modelo, não o texto dele."
+    },
+    {
+      "o_que": "Tipo Texto, que esvazia o campo",
+      "estado": "mantida",
+      "testes": [
+        "test/qr.spec.js › cada tipo tem rótulo e ícone, e só o texto livre não tem modelo"
+      ],
+      "evidencia": "Comparado com src/qr.js:18 e src/useQRCode.js:76 (sem modelo, o campo fica vazio). O teste confere que só o texto livre não tem modelo; o campo esvaziando na tela não tem teste."
+    },
+    {
+      "o_que": "Ver qual tipo está escolhido",
+      "estado": "mantida",
+      "testes": ["test/app.spec.js › o tipo põe o modelo no campo, no idioma da pessoa"],
+      "evidencia": "Comparado com src/QRCode.vue:76-77 e src/useQRCode.js:75 (classe ativo e aria-pressed). O teste confere o aria-pressed; o destaque visual não foi medido na tela."
+    },
+    {
+      "o_que": "Rótulos e modelos dos tipos no idioma da pessoa",
+      "estado": "mudou",
+      "testes": ["test/app.spec.js › o tipo põe o modelo no campo, no idioma da pessoa"],
+      "evidencia": "Comparado com src/qr.js:12-27 e as chaves tipo*, modelo* e tamanhoHd dos 10 i18n/*.json. O teste troca de pt-BR para en-US e confere o modelo do Wi-Fi em cada um.",
+      "nota": "Ganho. Antes os rótulos dos tipos (URL, Email, Telefone, WiFi, SMS, Texto), os modelos e o HD eram fixos em português em todos os idiomas. Agora são traduzidos, os modelos têm exemplos locais, e em pt-BR os rótulos viraram Link, E-mail e Wi-Fi."
+    },
+    {
+      "o_que": "Botão Gerar só com texto no campo",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › gera no aparelho e guarda no histórico só o texto, as cores, o tamanho e o tipo"
+      ],
+      "evidencia": "Comparado com src/QRCode.vue:58-66 e src/useQRCode.js:43,109 (podeGerar exige texto que não seja só espaço). O teste gera com texto; o botão desligado com o campo vazio não tem teste."
+    },
+    {
+      "o_que": "Gerar sem estar na conta",
+      "estado": "mudou",
+      "testes": [
+        "test/app.spec.js › sem conta, o código aparece do mesmo jeito e só o histórico fica de fora"
+      ],
+      "evidencia": "Comparado com src/useQRCode.js:112-117.",
+      "nota": "Ganho. Antes o app recusava gerar sem conta, com o erro \"Faça login para gerar e salvar no histórico.\" Agora o código aparece e só o histórico fica de fora, com o aviso \"Entre na sua conta para guardar no histórico.\""
+    },
+    {
+      "o_que": "O código some ao mudar texto, cor, tamanho ou tipo",
+      "estado": "mantida",
+      "testes": ["test/app.spec.js › mudar a cor apaga a imagem de antes, até gerar de novo"],
+      "evidencia": "Comparado com src/QRCode.vue:55,92,96,100 e src/useQRCode.js:68-70,77. O teste cobre só a cor do código; texto, fundo, tamanho e tipo não têm teste."
+    },
+    {
+      "o_que": "Prévia no fundo escolhido, com aviso quando está vazia",
+      "estado": "mantida",
+      "testes": ["test/qr.spec.js › o texto do vazio fica legível sobre o fundo escolhido"],
+      "evidencia": "Comparado com src/QRCode.vue:6-18: cartão na cor do fundo, ícone e \"Digite algo para gerar\". Agora o texto do vazio muda de cor para contrastar com o fundo (src/qr.js:43-51), o que o teste cobre; o cartão na cor do fundo não tem teste de tela."
+    },
+    {
+      "o_que": "Escolher a cor do código",
+      "estado": "mudou",
+      "testes": [
+        "test/app.spec.js › mudar a cor apaga a imagem de antes, até gerar de novo",
+        "test/app.spec.js › abrir uma entrada do histórico desenha o código sem criar outra entrada"
+      ],
+      "evidencia": "Comparado com src/QRCode.vue:90-93. Os testes escrevem e leem o valor do campo; o seletor do navegador não foi medido no iPhone (se dá para digitar um hex).",
+      "nota": "O QColor do Quasar num popup, com paleta e abas, virou o seletor de cor do navegador (input type=color). Qualquer #rrggbb continua possível."
+    },
+    {
+      "o_que": "Escolher a cor do fundo",
+      "estado": "mudou",
+      "evidencia": "Comparado com src/QRCode.vue:94-97. Sem teste da tela; não medido no aparelho.",
+      "nota": "A mesma troca da cor do código: o QColor em popup virou o seletor de cor do navegador. Qualquer #rrggbb continua possível."
+    },
+    {
+      "o_que": "Tamanhos Pequeno, Médio, Grande e HD (200 a 800 px)",
+      "estado": "mantida",
+      "testes": [
+        "test/qr.spec.js › a imagem é um PNG desenhado aqui, nas cores e no tamanho pedidos",
+        "test/qr.spec.js › cor e tamanho só da lista, com a reserva",
+        "test/app.spec.js › abrir uma entrada do histórico desenha o código sem criar outra entrada"
+      ],
+      "evidencia": "Comparado com src/QRCode.vue:98-105 e src/qr.js:22-27. Medido na auditoria (28/09): o PNG sai com 200, 300, 500 e 800 px exatos, como o serviço de antes. Os testes comparam o 800 com o 200 pelo tamanho do arquivo e conferem a lista; nenhum conta pixels."
+    },
+    {
+      "o_que": "Começar em 300 px, preto no branco",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › gera no aparelho e guarda no histórico só o texto, as cores, o tamanho e o tipo"
+      ],
+      "evidencia": "Comparado com src/qr.js:28-30; o teste confere size 300, #000000 e #ffffff na entrada gravada."
+    },
+    {
+      "o_que": "O código sai nas cores escolhidas",
+      "estado": "mantida",
+      "testes": [
+        "test/qr.spec.js › a imagem é um PNG desenhado aqui, nas cores e no tamanho pedidos"
+      ],
+      "evidencia": "No código de antes, color e bgcolor iam na URL do serviço externo; comparado com src/qr.js:70-73. Medido na auditoria: o PNG tem só as duas cores pedidas. O teste gera com cores escolhidas, mas não confere a cor dos pixels."
+    },
+    {
+      "o_que": "Margem em volta do código",
+      "estado": "mudou",
+      "testes": [
+        "test/qr.spec.js › cabe todo texto que o serviço de antes gerava (correção L), e o curto sai com a M"
+      ],
+      "evidencia": "No código de antes, o padrão do serviço externo (medido: margin=1, qzone=0); comparado com src/qr.js:68; o teste compara a imagem com a do pacote qrcode com margin 2.",
+      "nota": "Ganho. Antes a margem era a padrão do serviço, 1 px sem zona de silêncio; agora são 2 módulos de zona de silêncio, o que ajuda a leitura. A pessoa nunca escolheu a margem."
+    },
+    {
+      "o_que": "Gerar texto longo, até o limite do QR Code",
+      "estado": "mantida",
+      "testes": [
+        "test/qr.spec.js › cabe todo texto que o serviço de antes gerava (correção L), e o curto sai com a M",
+        "test/qr.spec.js › texto que não cabe num QR Code rejeita com código próprio",
+        "test/app.spec.js › texto longo demais avisa e não guarda nada"
+      ],
+      "evidencia": "Antes o serviço gerava com correção L (medido na auditoria: 2.900 x lidos de volta na versão 40). A v0.1.0 fixava a M (src/qr.js:69) e recusava de 2.332 a 2.953 bytes; consertado em 28/09: tenta a M e cai para a L quando o texto não cabe (CORRECOES em src/qr.js). Os testes geram 2.332 e 2.953 x, 1.476 é e 984 日, conferem que o curto sai com a M, que 2.954 x recusa e que a tela avisa sem guardar."
+    },
+    {
+      "o_que": "Baixar o PNG",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › baixar cria o link dentro do app, com o PNG do aparelho, e conta a métrica"
+      ],
+      "evidencia": "Comparado com src/useQRCode.js:157-166; o teste confere o PNG em data URL e o nome qrcode-<ms>.png. O PNG deixou de ser de paleta e passou a RGBA, sem efeito no uso."
+    },
+    {
+      "o_que": "Aviso de download feito ou com erro",
+      "estado": "mantida",
+      "evidencia": "Comparado com src/useQRCode.js:168-171; os textos \"QR Code baixado!\" e \"Erro ao baixar\" são os mesmos em pt-BR. Nenhum teste confere esses avisos: o teste de baixar só confere o link e a métrica."
+    },
+    {
+      "o_que": "Download contado nas métricas",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › baixar cria o link dentro do app, com o PNG do aparelho, e conta a métrica"
+      ],
+      "evidencia": "No código de antes, o download chamava o registro de métricas do RoqueOS ('qrcode', 'qr_download'); comparado com src/useQRCode.js:167, que chega ao mesmo registro pelo sistema do RoqueOS. Antes contava no clique; agora só quando o download dá certo."
+    },
+    {
+      "o_que": "Copiar",
+      "estado": "mudou",
+      "testes": [
+        "test/app.spec.js › copiar manda a imagem; sem cópia de imagem no navegador, manda o texto",
+        "test/app.spec.js › copiar a imagem recusada ainda copia o texto do código"
+      ],
+      "evidencia": "Comparado com copiar() em src/useQRCode.js. O aviso \"Erro ao copiar\" não tem teste.",
+      "nota": "Intencional, pela privacidade. Antes copiava a URL da imagem no api.qrserver.com (\"URL copiada!\"). Agora copia a imagem PNG (\"Imagem copiada!\") e, onde o navegador não copia imagem ou recusa, o texto do código (\"Texto do QR Code copiado!\"). A URL não existe mais: o texto não sai do aparelho."
+    },
+    {
+      "o_que": "Compartilhar",
+      "estado": "mudou",
+      "testes": [
+        "test/app.spec.js › compartilhar manda o PNG com o texto; sem arquivo, o texto; sem folha nenhuma, copia",
+        "test/app.spec.js › cancelar a folha de compartilhar não copia nada"
+      ],
+      "evidencia": "Comparado com compartilhar() em src/useQRCode.js.",
+      "nota": "Antes iam o título, o texto e o link da imagem no api.qrserver.com. Agora vai o PNG com o título e o texto; onde o aparelho não compartilha arquivo, a folha abre com o texto, como antes; sem folha nenhuma, copia. Cancelar a folha não copia mais (antes o cancelamento caía no copiar). O link da imagem de terceiro não existe mais, pelo conserto de privacidade."
+    },
+    {
+      "o_que": "Copiar e Compartilhar no Safari do iPhone",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › copiar manda a imagem; sem cópia de imagem no navegador, manda o texto",
+        "test/app.spec.js › copiar a imagem recusada ainda copia o texto do código",
+        "test/app.spec.js › compartilhar manda o PNG com o texto; sem arquivo, o texto; sem folha nenhuma, copia",
+        "test/qr.spec.js › o PNG para copiar e compartilhar sai sem esperar nada, com os bytes da imagem"
+      ],
+      "evidencia": "No código de antes, nada era esperado antes de writeText e share. A v0.1.0 esperava o PNG antes da chamada (src/useQRCode.js:181,201), e o Safari pode recusar fora do gesto; consertado em 28/09: o PNG sai da data URL sem await, e a imagem recusada cai no texto. Os testes conferem que a chamada acontece no mesmo toque; o jsdom não simula a exigência de gesto do Safari. Não medido no iPhone real."
+    },
+    {
+      "o_que": "Botões Baixar, Copiar e Compartilhar só com código na tela",
+      "estado": "mantida",
+      "evidencia": "Comparado com src/QRCode.vue:19 (v-if na imagem). Os testes só acham os botões depois de gerar; nenhum confere que eles somem sem código."
+    },
+    {
+      "o_que": "Gerar travado enquanto o código é feito",
+      "estado": "mantida",
+      "evidencia": "Comparado com src/useQRCode.js:37,43,90-104 (gerando desliga o botão até a imagem sair). Sem teste."
+    },
+    {
+      "o_que": "O que fica guardado no histórico",
+      "estado": "mudou",
+      "testes": [
+        "test/app.spec.js › gera no aparelho e guarda no histórico só o texto, as cores, o tamanho e o tipo",
+        "test/qr.spec.js › guarda só texto, tamanho, cores e tipo, com os nomes de antes"
+      ],
+      "evidencia": "Comparado com src/qr.js:92-100 e o sistema do RoqueOS. Os testes usam o sistema falso do SDK: conferem os campos enviados, não o documento no banco.",
+      "nota": "Intencional, pela privacidade. Mesmo lugar (users/{uid}/qrCodes) e mesmos nomes de campo (text, size, fgColor, bgColor, preset), com o carimbo createdAt do sistema. Deixam de ser gravados url (o link do terceiro com o texto dentro), createdAtMs e createdBy (e-mail, nome e foto da conta). Cor, tamanho ou tipo fora da lista caem no padrão antes de gravar."
+    },
+    {
+      "o_que": "Gerar com conta grava no histórico sem erro",
+      "estado": "mantida",
+      "evidencia": "A regra do banco da conta (só o dono lê e grava o histórico, sem validar campo) aceita a entrada sem createdBy e createdAtMs; o teste das regras do RoqueOS roda o criar do sistema contra o emulador; o QR Code está em produção desde 28/09 (QA \"QR Code 32\"). Conferido no RoqueOS (veredicto); não há teste no repo do app."
+    },
+    {
+      "o_que": "Erro ao guardar avisa e deixa o código na tela",
+      "estado": "mantida",
+      "evidencia": "Comparado com src/useQRCode.js:118-125: a imagem já está na tela quando a gravação falha, e o aviso é o mesmo \"Erro ao salvar no histórico\". Sem teste."
+    },
+    {
+      "o_que": "Botão Histórico com o número de entradas",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › o histórico de antes aparece, da mais nova para a mais velha, sem usar a URL do terceiro"
+      ],
+      "evidencia": "Comparado com src/QRCode.vue:35-45. Os testes abrem o histórico pelo botão; o contador não tem teste."
+    },
+    {
+      "o_que": "Histórico com as 50 mais novas primeiro",
+      "estado": "mantida",
+      "testes": [
+        "test/qr.spec.js › ordena da mais nova para a mais velha, tira as vazias e para no limite",
+        "test/app.spec.js › o histórico de antes aparece, da mais nova para a mais velha, sem usar a URL do terceiro"
+      ],
+      "evidencia": "No código de antes, o banco devolvia com orderBy createdAtMs desc e limit 50; comparado com src/qr.js:32,117-123 (ordena e corta em 50 no aparelho). Entrada sem texto agora sai da lista."
+    },
+    {
+      "o_que": "Miniatura de cada entrada do histórico",
+      "estado": "mudou",
+      "testes": [
+        "test/app.spec.js › o histórico de antes aparece, da mais nova para a mais velha, sem usar a URL do terceiro",
+        "test/qr.spec.js › nenhum arquivo de src/ tem endereço remoto no código"
+      ],
+      "evidencia": "Comparado com src/QRCode.vue:135-142,203-218.",
+      "nota": "Intencional. Antes a miniatura era a imagem remota do api.qrserver.com, pela URL gravada. Agora é desenhada no aparelho com o texto e as cores da entrada, sem depender do terceiro, também para as entradas antigas."
+    },
+    {
+      "o_que": "Começo do texto em cada entrada",
+      "estado": "mudou",
+      "testes": ["test/qr.spec.js › o resumo corta com reticências"],
+      "evidencia": "Comparado com src/qr.js:126-127 e src/QRCode.vue:143.",
+      "nota": "Cosmético. Antes 25 caracteres e \"...\"; agora 40 e \"…\"."
+    },
+    {
+      "o_que": "Abrir uma entrada e ver o código de novo",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › abrir uma entrada do histórico desenha o código sem criar outra entrada"
+      ],
+      "evidencia": "Comparado com src/QRCode.vue:220-223 e src/useQRCode.js:130-137: volta texto, tamanho, cores e tipo, desenha e fecha a folha, sem criar entrada. O teste confere texto, cor do código, tamanho e que nada é gravado; fundo, tipo e o fechamento da folha não têm teste."
+    },
+    {
+      "o_que": "Histórico carregando",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › o histórico que ainda não chegou mostra a barra do carregando, parada no perfil leve"
+      ],
+      "evidencia": "No código de antes, spinner e \"Carregando...\"; comparado com o RosVazio carregando do kit ui (v0.5.0) no src/QRCode.vue de hoje (na v0.1.0 era só o texto, :118-120): barra que corre, parada no perfil leve (veredicto G11)."
+    },
+    {
+      "o_que": "Histórico vazio",
+      "estado": "mantida",
+      "evidencia": "Comparado com src/QRCode.vue:121-126 (RosVazio com o mesmo \"Nenhum histórico\"). Sem teste."
+    },
+    {
+      "o_que": "Limpar o histórico com confirmação",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › limpar o histórico pede confirmação e apaga entrada por entrada"
+      ],
+      "evidencia": "Comparado com src/QRCode.vue:147-171 (RosConfirmar de perigo, com Cancelar e Limpar e os mesmos textos). O teste confere que nada é apagado antes de confirmar; Cancelar não tem teste. Antes o modal fechava só depois de apagar; o momento em que o RosConfirmar do kit fecha não foi conferido."
+    },
+    {
+      "o_que": "Limpar apaga todas as entradas da conta",
+      "estado": "mudou",
+      "testes": [
+        "test/app.spec.js › limpar o histórico pede confirmação e apaga entrada por entrada"
+      ],
+      "evidencia": "Comparado com src/useQRCode.js:139-154; o teste apaga 2 entradas.",
+      "nota": "Antes apagava em lotes atômicos de 400, relendo do banco até esvaziar. Agora apaga uma entrada por vez, todas as que a tela recebe. O resultado é o mesmo; um erro no meio deixa parte do histórico."
+    },
+    {
+      "o_que": "Abrir e limpar um histórico grande",
+      "estado": "mudou",
+      "evidencia": "Comparado com src/useQRCode.js:56-65,145 e o sistema do RoqueOS (assina a coleção inteira, sem consulta). Não medido com 1.000 entradas no celular.",
+      "nota": "Antes o banco devolvia só as 50 mais novas (orderBy e limit). Agora o app recebe a coleção inteira e corta em 50 no aparelho, porque o contrato colecoes do SDK não tem limite nem ordem; limpar faz uma ida ao banco por entrada."
+    },
+    {
+      "o_que": "Limpar travado sem histórico ou durante a limpeza",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › limpar o histórico pede confirmação e apaga entrada por entrada"
+      ],
+      "evidencia": "Comparado com src/QRCode.vue:151-156,200 e src/useQRCode.js:140. O teste confere aria-disabled com o histórico vazio e que o clique não abre a confirmação; durante a limpeza não tem teste."
+    },
+    {
+      "o_que": "Erro ao limpar avisa",
+      "estado": "mantida",
+      "evidencia": "Comparado com src/useQRCode.js:147-150, com o mesmo \"Erro ao limpar histórico\". Sem teste."
+    },
+    {
+      "o_que": "Histórico acompanha a conta ao trocar ou sair",
+      "estado": "mantida",
+      "evidencia": "Comparado com o sistema do RoqueOS: troca a assinatura quando a conta muda e entrega lista vazia sem conta. Sem teste no repo do app."
+    },
+    {
+      "o_que": "Fechar a janela solta o histórico e a conta",
+      "estado": "mantida",
+      "evidencia": "Comparado com src/QRCode.vue:225 (encerrar solta a coleção e a conta: src/useQRCode.js:215-217 e o sistema do RoqueOS), src/index.js:58-63 (solta o idioma) e o hospedador de apps do RoqueOS (desmonta o app e encerra o sistema). Sem teste no repo do app; o spec antigo tinha \"unsubscribes auth and history listeners on unmount\"."
+    },
+    {
+      "o_que": "Histórico gravado antes da saída continua aparecendo",
+      "estado": "mantida",
+      "testes": [
+        "test/qr.spec.js › lê a entrada de antes, com a data do aparelho quando falta o carimbo",
+        "test/app.spec.js › o histórico de antes aparece, da mais nova para a mais velha, sem usar a URL do terceiro",
+        "test/app.spec.js › abrir uma entrada do histórico desenha o código sem criar outra entrada"
+      ],
+      "evidencia": "Mesmo caminho e mesmos nomes de campo; o sistema do RoqueOS converte createdAt em criadoEm, e src/qr.js:103-114 usa createdAtMs como recuo e ignora url e createdBy. Os testes semeiam criadoEm já convertido: a conversão do carimbo de data só é testada no RoqueOS. Se o RoqueOS voltar de versão, as entradas novas, sem createdAtMs, somem do orderBy antigo."
+    },
+    {
+      "o_que": "Textos nos 10 idiomas, trocando com a janela aberta",
+      "estado": "mantida",
+      "testes": [
+        "test/troca-de-idioma.spec.js › vale o último idioma pedido, mesmo que a resposta dele chegue antes",
+        "test/app.spec.js › o tipo põe o modelo no campo, no idioma da pessoa"
+      ],
+      "evidencia": "Antes os textos de antes tinham 22 chaves próprias mais as chaves comuns do RoqueOS, nos 10 idiomas; hoje i18n/<idioma>.json com as mesmas 48 chaves nos 10 (contado em 28/09) e src/index.js:31-52 trocando o idioma com a janela aberta."
+    },
+    {
+      "o_que": "Celular e janela estreita em uma coluna",
+      "estado": "mudou",
+      "evidencia": "Comparado com src/qr.scss:26,308-323. Sem teste; container query pede Safari 16 ou mais, não medido no iPhone-alvo.",
+      "nota": "Ganho. Antes a coluna única vinha da largura da tela (@media abaixo de 700 px); agora vem da largura da janela do app (@container abaixo de 700 px), e vale também para janela estreita no desktop."
+    },
+    {
+      "o_que": "Cores da janela e tema",
+      "estado": "mudou",
+      "evidencia": "Comparado com src/qr.scss:9-28. Sem teste; a legibilidade no tema claro não foi medida na tela.",
+      "nota": "Antes o app era escuro fixo, com cores próprias; agora usa as variáveis de tema do sistema e acompanha o tema escolhido."
+    },
+    {
+      "o_que": "Efeitos visuais da prévia e dos botões",
+      "estado": "mudou",
+      "evidencia": "Comparado com src/qr.scss:61-72. Sem teste; não comparado na tela.",
+      "nota": "Cosmético. Saem o aumento da prévia ao passar o mouse, o desfoque atrás dela e o botão que sobe no hover; a prévia passa de 200 para 220 px, com margem interna e sombra."
+    },
+    {
+      "o_que": "Leitor de tela e foco pelo teclado",
+      "estado": "mudou",
+      "testes": [
+        "test/app.spec.js › o tipo põe o modelo no campo, no idioma da pessoa",
+        "test/app.spec.js › limpar o histórico pede confirmação e apaga entrada por entrada"
+      ],
+      "evidencia": "Comparado com src/QRCode.vue:5,10,48,70,77,138,154 e src/qr.scss:154,186,273. Os testes conferem aria-pressed e aria-disabled; nenhum leitor de tela real foi usado.",
+      "nota": "Ganho. A imagem tem descrição traduzida (antes \"QR Code\" fixo), o rótulo está ligado ao campo, os tipos são um grupo com aria-pressed, as miniaturas são decorativas (alt vazio; antes sem alt), o Limpar vazio continua focável com aria-disabled, e há contorno de foco pelo teclado (focus-visible)."
+    },
+    {
+      "o_que": "Ícone, cor, categoria, Loja, janela e nome no Dock",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › o id e as capacidades são os do manifesto, e o manifesto é válido"
+      ],
+      "evidencia": "Antes a entrada do app no registro do RoqueOS: ícone qr_code_2, cor #8b5cf6, categoria utilities, na Loja, janela 1080×720, nome dock.qrCode com os mesmos nomes dos 10 idiomas. Hoje app.json:5-37 gera a mesma entrada no registro de apps do RoqueOS, com o mínimo novo de 360×480 (veredicto G8). O teste valida o manifesto, não o registro gerado."
+    },
+    {
+      "o_que": "Descrição na Loja",
+      "estado": "mudou",
+      "evidencia": "Comparado com app.json:17-28. Sem teste do texto.",
+      "nota": "Ganho. Antes \"Gere e escaneie QR Codes\", em inglês nos outros 8 idiomas, prometendo ler códigos, o que o app nunca fez. Agora \"Gere QR Codes de links, Wi-Fi, e-mail e texto, no próprio aparelho\", traduzida nos 10 idiomas."
+    },
+    {
+      "o_que": "Abrir rápido pela pré-carga",
+      "estado": "mantida",
+      "evidencia": "Antes a pré-carga de apps do RoqueOS importava a tela do QR Code de antes; hoje o prefetchApp espalha a lista de carregadores de apps do RoqueOS, que tem o pacote @roqueos-apps/qrcode (veredicto G9). O tempo da primeira abertura com cache frio não foi medido."
+    },
+    {
+      "o_que": "Avisos na tela: duração e nome do app",
+      "estado": "mudou",
+      "testes": [
+        "test/app.spec.js › sem conta, o código aparece do mesmo jeito e só o histórico fica de fora"
+      ],
+      "evidencia": "Comparado com o sistema do RoqueOS (o padrão de 5000 ms vem do sistema de avisos do RoqueOS) e o nome do app registrado no RoqueOS (veredictos G2 e G3); o nome foi medido em produção com o QR Code (hotfix 2562). O teste confere só que o app pede aviso não fixo.",
+      "nota": "Antes cada aviso sumia em 2.000 a 2.500 ms; agora vale o padrão do sistema, 5.000 ms: o aviso fica mais tempo e nenhum some antes da hora. Desde o build 2562 o aviso leva o nome do app, pelo registro."
+    }
+  ]
+}
