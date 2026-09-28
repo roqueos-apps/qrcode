@@ -8,6 +8,8 @@ num histórico que volta em qualquer aparelho. Nos dez idiomas do RoqueOS.
 
 Use de graça em [roqueos.com.br](https://roqueos.com.br), no computador, no celular e na TV.
 
+![O QR Code do RoqueOS: o código de um link desenhado no aparelho, com baixar, copiar e compartilhar](docs/capa.jpg)
+
 _English below._
 
 ## Por que existe como repo
