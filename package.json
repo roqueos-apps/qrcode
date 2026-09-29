@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "@roqueos-apps/app-sdk": "github:roqueos-apps/app-sdk#v0.2.0",
-    "@roqueos-apps/ui": "git+ssh://git@github.com/roqueos-apps/ui.git#v0.6.0",
+    "@roqueos-apps/ui": "github:roqueos-apps/ui#v0.6.0",
     "qrcode": "1.5.4"
   },
   "peerDependencies": {
