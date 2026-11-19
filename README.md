@@ -1,150 +1,90 @@
 # QR Code
 
-O QR Code do [RoqueOS](https://roqueos.com.br): gera o código de um link, de uma rede Wi-Fi, de
-um e-mail, de um telefone, de um SMS ou de qualquer texto, com a cor do código, a cor do fundo e
-o tamanho que você escolher, e baixa, copia ou compartilha a imagem. **O código é desenhado no
-próprio aparelho**: o texto não vai para serviço nenhum. Com a conta, cada código gerado entra
-num histórico que volta em qualquer aparelho. Nos dez idiomas do RoqueOS.
+_English | [Português](README.pt-BR.md)_
 
-Use de graça em [roqueos.com.br](https://roqueos.com.br), no computador, no celular e na TV.
+The QR Code app of [RoqueOS](https://roqueos.com.br): it makes the code for a link, a Wi-Fi network, an email, a phone number, an SMS or any text, with the code color, the background color and the size you pick, and downloads, copies or shares the image. **The code is drawn on your own device**: the text is never sent to any service. With an account, every code you make goes into a history that follows you across devices. In all ten RoqueOS languages.
 
-![O QR Code do RoqueOS: o código de um link desenhado no aparelho, com baixar, copiar e compartilhar](docs/capa.jpg)
+Use it for free at [roqueos.com.br](https://roqueos.com.br), on the computer, the phone and the TV.
 
-_English below._
+![The RoqueOS QR Code: the code of a link drawn on the device, with download, copy and share](docs/capa.jpg)
 
-## Por que existe como repo
+## Why it exists as a repo
 
-O QR Code nasceu dentro do RoqueOS, que é fechado. Em 28/09/2026 ele saiu para o próprio
-repositório na organização [roqueos-apps](https://github.com/roqueos-apps). O RoqueOS o instala
-por uma tag, como dependência git, e ele fala com o RoqueOS só pelo
-[`app-sdk`](https://github.com/roqueos-apps/app-sdk). A tela é feita com o kit
-[`ui`](https://github.com/roqueos-apps/ui). O mesmo código roda dentro do RoqueOS, sozinho no
-navegador (`yarn dev`) e no teste.
+QR Code was born inside RoqueOS, which is closed. On 28/09/2026 it moved to its own repository in the [roqueos-apps](https://github.com/roqueos-apps) organization. RoqueOS installs it by tag, as a git dependency, and it talks to RoqueOS only through the [`app-sdk`](https://github.com/roqueos-apps/app-sdk). The screen is built with the [`ui`](https://github.com/roqueos-apps/ui) kit. The same code runs inside RoqueOS, alone in the browser (`yarn dev`) and in the tests.
 
-A saída consertou uma coisa: o QR Code de antes pedia a imagem a um serviço de terceiros
-(`api.qrserver.com`) com o texto no endereço, e guardava esse endereço no histórico. A senha de
-um Wi-Fi em QR passava por fora. Agora quem desenha é o pacote
-[`qrcode`](https://github.com/soldair/node-qrcode), no navegador, e o histórico guarda só o texto
-e as escolhas.
+The move fixed one thing: the old QR Code asked a third-party service (`api.qrserver.com`) for the image, with the text in the address, and stored that address in the history. The password of a Wi-Fi network in a QR code went outside. Now the [`qrcode`](https://github.com/soldair/node-qrcode) package draws it, in the browser, and the history keeps only the text and the choices ([CHANGELOG.md](CHANGELOG.md), 0.1.0).
 
-## Arquitetura
+## Getting started
+
+You need Node 22 or newer (the [`.nvmrc`](.nvmrc) says 24) and Yarn 1.22.
+
+```bash
+git clone https://github.com/roqueos-apps/qrcode.git
+cd qrcode
+yarn install --frozen-lockfile --ignore-scripts
+yarn dev          # QR Code in a fake RoqueOS window, with a local account
+yarn verificar    # lint, format, tests and app check: the same as CI and pre-push
+```
+
+In the `yarn dev` window the history lives in `localStorage` and survives F5. `?idioma=ar-AR` opens it in Arabic, `?leve=1` as a low-end device sees it and `?convidado=1` without an account. The step by step, with what each command shows, is in [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md).
+
+## The parts
 
 ```mermaid
 flowchart LR
   subgraph RoqueOS
-    H[Sistema do app-sdk<br/>colecoes]
-    F[(Conta: users/uid/qrCodes)]
+    H[app-sdk system<br/>colecoes]
+    F[(Account: users/uid/qrCodes)]
   end
   Q[QR Code<br/>QRCode.vue + useQRCode.js]
-  L[qrcode<br/>desenha no aparelho]
+  L[qrcode<br/>draws on the device]
   H -- sistema --> Q
-  Q -- texto, cores, tamanho --> H
+  Q -- text, colors, size --> H
   H --> F
   Q --> L
 ```
 
-```text
-app.json            quem ele é: id permanente (qrcode), nome e descrição nos dez idiomas,
-                    ícone, cor, janela, a capacidade e a coleção que ele abre
-i18n/<idioma>.json  os textos da tela, um arquivo por idioma
-src/
-  index.js          definirApp: cria o app Vue próprio dentro do elemento que o RoqueOS dá
-  QRCode.vue        a tela: prévia, ações, formulário, histórico e confirmação
-  useQRCode.js      o motor: gerar, o histórico na conta, baixar, copiar, compartilhar
-  qr.js             o que não depende de tela: tipos, a imagem, os campos do histórico, ordem
-  textos.js         carrega o JSON do idioma (com ?raw) e traduz uma chave
-  qr.scss           o visual
-dev/main.js         o yarn dev: o QR Code numa janela falsa do RoqueOS
-test/               Vitest: o app pelo SDK, a lógica e a troca de idioma
-```
+| Part                                   | What it is                                                                                                     |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| [`app.json`](app.json)                 | who it is: permanent id (`qrcode`), name and description in ten languages, icon, color, window, the capability |
+| [`src/index.js`](src/index.js)         | `definirApp`: creates its own Vue app inside the element RoqueOS gives it                                      |
+| [`src/QRCode.vue`](src/QRCode.vue)     | the screen: preview, actions, form, history and confirmation                                                   |
+| [`src/useQRCode.js`](src/useQRCode.js) | the engine: generate, the history in the account, download, copy, share                                        |
+| [`src/qr.js`](src/qr.js)               | what does not depend on the screen: types, the image, the history fields, ordering                             |
+| [`src/textos.js`](src/textos.js)       | loads the language JSON (with `?raw`) and translates a key                                                     |
+| [`i18n/`](i18n/)                       | the screen texts, one file per language                                                                        |
+| [`dev/main.js`](dev/main.js)           | the `yarn dev`: QR Code in a fake RoqueOS window                                                               |
+| [`test/`](test/)                       | Vitest: the app through the SDK, the logic and the language switch                                             |
+| [`paridade.json`](paridade.json)       | the inventory of what the old app did and what happened to each item when it moved out                         |
 
-### Como ele fala com o RoqueOS
+What each button does: **Download** saves the PNG as `qrcode-<date>.png`; **Copy** copies the image where the browser copies images, and the code's text otherwise; **Share** opens the device's share sheet with the PNG and the text, and copies where there is no sheet; **Type** puts a template for link, email, phone, Wi-Fi or SMS in the field, in the person's language; **History** shows the 50 newest, with the thumbnail drawn on the device, and clearing it asks first ([`src/useQRCode.js`](src/useQRCode.js), [`src/qr.js`](src/qr.js)).
 
-Só pelo `sistema` do SDK, e a capacidade opcional está no `app.json`:
+## Status and limits
 
-- `colecoes`: a coleção `historico`, que o RoqueOS guarda na conta da pessoa, no mesmo lugar de
-  antes (`users/{uid}/qrCodes`). Cada entrada tem `text`, `size`, `fgColor`, `bgColor` e
-  `preset`, os nomes de antes, e a data é do sistema (`criadoEm`). O histórico de quem já usava
-  continua valendo; os campos que o app de antes gravava a mais (a URL do terceiro e os dados da
-  conta) ficam onde estão e não são lidos.
-- `idioma`, `desempenho`, `avisar` e `metricas` (os eventos `qr_generate` e `qr_download`).
+Version 0.1.1 ([`package.json`](package.json), [CHANGELOG.md](CHANGELOG.md)). The app does not read QR codes, only makes them. Without an account the code appears the same way; it just does not enter the history, and the app says so. A text above 2,953 bytes does not fit in a QR code and the app warns instead of generating. Nothing was measured on a real iPhone ([`paridade.json`](paridade.json), `auditoria`). The known limits are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#9-known-limits).
 
-Sem conta, o código aparece do mesmo jeito; só não entra no histórico, e o app avisa.
+## Documentation
 
-### O que cada botão faz
+Everything is reached from [docs/INDEX.md](docs/INDEX.md), in English, with the Portuguese pair in [docs/pt-BR/](docs/pt-BR/INDEX.md).
 
-- **Baixar**: o PNG, com o nome `qrcode-<data>.png`.
-- **Copiar**: a imagem, onde o navegador copia imagem; onde não copia, o texto do código.
-- **Compartilhar**: a folha de compartilhar do aparelho com o PNG; onde o aparelho não
-  compartilha arquivo, copia.
-- **Tipo**: põe no campo um modelo de link, e-mail, telefone, Wi-Fi ou SMS, com exemplos no
-  idioma da pessoa.
-- **Histórico**: as 50 mais novas, com a miniatura desenhada no aparelho. Abrir uma entrada
-  volta o formulário e desenha o código sem criar outra entrada. Limpar pede confirmação.
+| Question                                   | Document                                           |
+| ------------------------------------------ | -------------------------------------------------- |
+| From zero to the code on screen            | [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md) |
+| How it is built inside                     | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)       |
+| Every command, file, field and text key    | [docs/REFERENCE.md](docs/REFERENCE.md)             |
+| Maintaining, releasing, undoing            | [docs/OPERATIONS.md](docs/OPERATIONS.md)           |
+| Something failed                           | [docs/WHEN-IT-BREAKS.md](docs/WHEN-IT-BREAKS.md)   |
+| What a term means here                     | [docs/GLOSSARY.md](docs/GLOSSARY.md)               |
+| Adding a type, a size or a text            | [docs/EXTENDING.md](docs/EXTENDING.md)             |
+| How RoqueOS mounts it and what it receives | [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md)       |
+| What it protects and what it does not      | [docs/THREAT-MODEL.md](docs/THREAT-MODEL.md)       |
+| What the tests prove                       | [docs/TESTING.md](docs/TESTING.md)                 |
+| Contributing                               | [CONTRIBUTING.md](CONTRIBUTING.md)                 |
 
-## Pré-requisitos
+## Contributing
 
-- Node 22 ou mais novo (o `.nvmrc` diz 24).
-- Yarn 1.22.
+Read [CONTRIBUTING.md](CONTRIBUTING.md). Every commit carries `Signed-off-by` (DCO), and CI checks it. A security issue goes through [SECURITY.md](SECURITY.md), never a public issue.
 
-## Como rodar
+## Credits and license
 
-```bash
-yarn install --ignore-scripts
-yarn dev          # o QR Code numa janela falsa do RoqueOS, numa conta local
-yarn verificar    # lint, formato, testes e app check: o mesmo do CI e do pre-push
-yarn test         # só os testes
-```
-
-Na janela do `yarn dev` o histórico fica no `localStorage` e continua depois do F5.
-`?idioma=ar-AR` abre em árabe, `?leve=1` como o aparelho fraco vê e `?convidado=1` sem conta.
-
-## Paridade com o app de antes
-
-`paridade.json` é o inventário do que o QR Code fazia dentro do RoqueOS e do que aconteceu com
-cada coisa na saída: `mantida`, `mudou` (com a nota do que mudou) ou `perdida` (só com a
-decisão escrita de quem decidiu). Cada item cita o teste deste repo que o prova, ou a
-evidência. O RoqueOS confere o arquivo no pacote instalado antes de aceitar a versão: teste
-citado que não existe mais, estado de dúvida ou perda sem decisão reprovam. Mudou uma
-funcionalidade, ou um teste citado ali? Atualize o inventário no mesmo commit.
-
-## Contribuir
-
-Leia o [CONTRIBUTING.md](CONTRIBUTING.md). Todo commit leva `Signed-off-by` (DCO), e o CI
-confere. Falha de segurança vai pelo [SECURITY.md](SECURITY.md), nunca por issue pública.
-
-## Créditos e licença
-
-[MIT](LICENSE). Os ícones são do [Material Icons](https://fonts.google.com/icons)
-(Apache-2.0), pelo kit de interface; veja o [ASSETS.md](ASSETS.md). O código é desenhado pelo
-[qrcode](https://github.com/soldair/node-qrcode) (MIT). "QR Code" é marca registrada da DENSO
-WAVE. O nome e a marca RoqueOS são da LEVELHARD e não fazem parte da licença.
-
----
-
-## English
-
-The QR Code app of [RoqueOS](https://roqueos.com.br): makes the code for a link, a Wi-Fi
-network, an email, a phone number, an SMS or any text, with the code color, background color
-and size you pick, and downloads, copies or shares the image. **The code is drawn on your own
-device**: the text is never sent anywhere. With an account, every code you make goes into a
-history that follows you across devices. In all ten RoqueOS languages.
-
-It moved out of the closed RoqueOS core on 28/09/2026 into its own repository in the
-[roqueos-apps](https://github.com/roqueos-apps) organization. RoqueOS installs it by tag, and it
-talks to RoqueOS only through the `sistema` of
-[`@roqueos-apps/app-sdk`](https://github.com/roqueos-apps/app-sdk): `colecoes` (the history, in
-the same place as before), plus language, light profile, notices and metrics. The move fixed a
-privacy issue: the old app asked a third-party service (`api.qrserver.com`) for the image, with
-the text in the URL, and stored that URL in the history. The image is now drawn by the
-[`qrcode`](https://github.com/soldair/node-qrcode) package in the browser.
-
-Run `yarn install --ignore-scripts`, then `yarn dev` (a fake RoqueOS window with a local
-account) or `yarn verificar` (what CI runs). Every commit must be signed off (DCO). Licensed
-under [MIT](LICENSE); icons are Material Icons (Apache-2.0). "QR Code" is a registered trademark
-of DENSO WAVE. The RoqueOS name and brand belong to LEVELHARD and are not covered.
-
-`paridade.json` lists everything this app did inside the RoqueOS core and what happened to each
-item when it moved out (kept, changed with a note, or lost only with a written decision), each
-backed by a test in this repository or other evidence. RoqueOS checks it in the installed
-package before accepting a version.
+[MIT](LICENSE). The icons are [Material Icons](https://fonts.google.com/icons) (Apache-2.0), through the interface kit; see [ASSETS.md](ASSETS.md). The code is drawn by [qrcode](https://github.com/soldair/node-qrcode) (MIT). "QR Code" is a registered trademark of DENSO WAVE. The RoqueOS name and brand belong to LEVELHARD and are not covered by the license.
