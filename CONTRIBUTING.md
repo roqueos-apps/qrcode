@@ -1,39 +1,20 @@
-# Como contribuir
+# How to contribute
 
-Obrigado por querer ajudar. A régua comum da organização está no
-[CONTRIBUTING da roqueos-apps](https://github.com/roqueos-apps/.github/blob/main/CONTRIBUTING.md);
-aqui entra só o que é do QR Code.
+_English | [Português](docs/pt-BR/CONTRIBUTING.md)_
 
-1. Abra uma issue antes de mudar o que a pessoa vê ou o que o histórico guarda. Correção
-   pequena pode ir direto para o PR.
-2. Faça o fork, crie um branch e rode `yarn install --ignore-scripts`.
-3. Todo commit leva `Signed-off-by` (`git commit -s`, o DCO). O check `dco` do pull request
-   reprova sem.
-4. Toda correção vem com um teste que reprova sem ela.
-5. **O código nasce no aparelho.** Não mande o texto do QR para serviço nenhum, nem para
-   desenhar a imagem: ele pode ser a senha de um Wi-Fi.
-6. Campo novo no histórico é aditivo; mudar o nome ou o sentido de um que existe (`text`,
-   `size`, `fgColor`, `bgColor`, `preset`) apaga o que a pessoa tinha.
-7. Texto novo entra nos dez `i18n/*.json`, com as mesmas chaves. O `app check` reprova se
-   faltar um idioma.
-8. Rode `yarn verificar` antes de abrir o PR. É o mesmo que o CI roda. `yarn dev` abre o QR
-   Code numa janela falsa do RoqueOS, numa conta local.
+Thank you for wanting to help. The common bar of the organization is in the [roqueos-apps CONTRIBUTING](https://github.com/roqueos-apps/.github/blob/main/CONTRIBUTING.md); here goes only what is QR Code's.
 
-Não mude o `id` do `app.json` (`qrcode`) nem o nome da coleção (`historico`): é por eles que o
-RoqueOS acha as janelas, os atalhos e o histórico de quem já usa.
+1. Open an issue before changing what people see or what the history stores. A small fix can go straight to the pull request.
+2. Fork, create a branch and run `yarn install --ignore-scripts`.
+3. Every commit carries `Signed-off-by` (`git commit -s`, the DCO). The pull request's `dco` check fails without it.
+4. Every fix comes with a test that fails without it.
+5. **The code is born on the device.** Do not send the QR text to any service, not even to draw the image: it can be the password of a Wi-Fi network.
+6. A new history field is additive; changing the name or the meaning of an existing one (`text`, `size`, `fgColor`, `bgColor`, `preset`) erases what people had.
+7. New text goes into the ten `i18n/*.json`, with the same keys. `app check` fails if a language is missing.
+8. Run `yarn verificar` before opening the pull request. It is the same as CI runs. `yarn dev` opens QR Code in a fake RoqueOS window, with a local account.
 
-O código, os comentários e as mensagens de commit são em português do Brasil. Issue e PR em
-inglês são bem-vindos. Ao participar você concorda com o [código de conduta](CODE_OF_CONDUCT.md).
+Do not change the `id` in `app.json` (`qrcode`) or the collection name (`historico`): RoqueOS finds the windows, the shortcuts and the history of whoever already uses it by them.
 
----
+Where each kind of change goes, and which test proves it, is in [docs/EXTENDING.md](docs/EXTENDING.md) and [docs/TESTING.md](docs/TESTING.md). A feature the old in-core app had changes [`paridade.json`](paridade.json) in the same commit.
 
-## Contributing (English)
-
-The organization-wide guide is the
-[roqueos-apps CONTRIBUTING](https://github.com/roqueos-apps/.github/blob/main/CONTRIBUTING.md).
-Open an issue before changing what people see or what the history stores; fork, branch,
-`yarn install --ignore-scripts`; sign off every commit (`git commit -s`); every fix comes with
-a test that fails without it. The QR code is drawn on the device: never send its text to any
-service, not even to render the image. New text goes into all ten `i18n/*.json`; run
-`yarn verificar` before the pull request. Never change the `id` in `app.json`, the collection
-name, or the names of the history fields.
+The code, the comments and the commit messages are in Brazilian Portuguese. Issues and pull requests in English are welcome. By taking part you agree to the [code of conduct](CODE_OF_CONDUCT.md). A security problem never goes into a public issue: [SECURITY.md](SECURITY.md) has the private channel.
