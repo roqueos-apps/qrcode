@@ -5,6 +5,14 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/), e
 
 ## [Não lançado]
 
+### Adicionado
+
+- A documentação no padrão da família (18/11/2026): `docs/` em inglês e o par em `docs/pt-BR/`,
+  declarados em `docs/docs.json` (começar, arquitetura, referência, operação, quando quebra,
+  glossário, estender, integrações, modelo de ameaças e testes). O `README.md` e o
+  `CONTRIBUTING.md` passam a ser em inglês, com o par em `README.pt-BR.md` e
+  `docs/pt-BR/CONTRIBUTING.md`.
+
 ### Mudado
 
 - O kit de interface (`@roqueos-apps/ui`) entra por HTTPS (`github:roqueos-apps/ui#v0.6.0`), no
